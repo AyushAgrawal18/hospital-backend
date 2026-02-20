@@ -1,12 +1,15 @@
 const express = require('express');
 const app = express();
 const db = require('./config/db');
+const doctorRoutes = require('./routes/doctorRoutes');
+
 
 app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send("Hospital API Running");
 });
+app.use('/api/doctors', doctorRoutes);
 
 app.get('/test-db', async (req, res) => {
     try {
