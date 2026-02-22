@@ -6,26 +6,29 @@ exports.createDoctor = asyncHandler(async (req, res, next) => {
   // try {
   const { name, specialization, experience } = req.body;
 
-  if (!name || !specialization || experience===null) {
+  if (!name || !specialization || experience === null) {
     const error = new Error("All fields are required");
     error.statusCode = 400;
     throw error;
   }
 
-  if(typeof experience !== "number" || experience < 0) {
+  const experienceNumber = Number(experience);
+
+  if (isNaN(experienceNumber) || experienceNumber < 0) {
     const error = new Error("Experience must be a non-negative number");
     error.statusCode = 400;
     throw error;
   }
 
-
+  const photoPath = req.file ? req.file.path : null;
 
   const [result] = await db.query(
-    "INSERT INTO doctors (name, specialization, experience) VALUES (?, ?, ?)",
-    [name, specialization, experience],
+    "INSERT INTO doctors (name, specialization, experience, photo) VALUES (?, ?, ?, ?)",
+    [name, specialization, experience, photoPath],
   );
 
   res.status(201).json({
+    success: true,
     message: "Doctor created",
     doctorId: result.insertId,
   });
@@ -46,47 +49,61 @@ exports.createDoctor = asyncHandler(async (req, res, next) => {
 // });
 
 exports.getDoctors = asyncHandler(async (req, res) => {
-    let { page = 1, limit = 5, specialization, search } = req.query;
+  let { page = 1, limit = 5, specialization, search } = req.query;
 
-    page = parseInt(page);
-    limit = parseInt(limit);
+  page = parseInt(page);
+  limit = parseInt(limit);
 
-    const offset = (page - 1) * limit;
+  const offset = (page - 1) * limit;
 
-    let baseQuery = "FROM doctors WHERE 1=1";
-    let values = [];
+  let baseQuery = "FROM doctors WHERE 1=1";
+  let values = [];
 
-    if (specialization) {
-        baseQuery += " AND specialization = ?";
-        values.push(specialization);
+  if (specialization) {
+    baseQuery += " AND specialization = ?";
+    values.push(specialization);
+  }
+
+  if (search) {
+    baseQuery += " AND name LIKE ?";
+    values.push(`%${search}%`);
+  }
+
+  const [rows] = await db.query(`SELECT * ${baseQuery} LIMIT ? OFFSET ?`, [
+    ...values,
+    limit,
+    offset,
+  ]);
+
+  const [[{ count }]] = await db.query(
+    `SELECT COUNT(*) as count ${baseQuery}`,
+    values,
+  );
+
+  const updatedRows = rows.map((doctor) => {
+    let photoUrl = null;
+
+    if (doctor.photo) {
+      const normalizedPath = doctor.photo.replace(/\\/g, "/");
+
+      photoUrl = `${req.protocol}://${req.get("host")}/${normalizedPath}`;
     }
 
-    if (search) {
-        baseQuery += " AND name LIKE ?";
-        values.push(`%${search}%`);
-    }
+    return {
+      ...doctor,
+      photoUrl,
+    };
+  });
 
-    const [rows] = await db.query(
-        `SELECT * ${baseQuery} LIMIT ? OFFSET ?`,
-        [...values, limit, offset]
-    );
-
-    const [[{ count }]] = await db.query(
-        `SELECT COUNT(*) as count ${baseQuery}`,
-        values
-    );
-
-    res.json({
-        success: true,
-        page,
-        limit,
-        total: count,
-        totalPages: Math.ceil(count / limit),
-        data: rows
-    });
+  res.json({
+    success: true,
+    page,
+    limit,
+    total: count,
+    totalPages: Math.ceil(count / limit),
+    data: updatedRows,
+  });
 });
-
-
 
 exports.getDoctorById = asyncHandler(async (req, res, next) => {
   // try {
@@ -101,17 +118,24 @@ exports.getDoctorById = asyncHandler(async (req, res, next) => {
     throw error;
   }
 
+  const doctor = rows[0];
+
+  if (doctor.photo) {
+    const normalizedPath = doctor.photo.replace(/\\/g, "/");
+    doctor.photoUrl = `${req.protocol}://${req.get("host")}/${normalizedPath}`;
+  } else {
+    doctor.photoUrl = null;
+  }
+
   res.json({
     success: true,
-    doctor: rows[0],
+    data: doctor,
   });
   // } catch (error) {
   //   // res.status(500).json({ error: error.message });
   //   next(error);
   // }
 });
-
-
 
 exports.updateDoctor = asyncHandler(async (req, res, next) => {
   // try {
