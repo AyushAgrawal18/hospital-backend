@@ -6,7 +6,8 @@ const upload = require("../middleware/uploadMiddleware");
 // router.post("/", doctorController.createDoctor);
 router.get("/", doctorController.getDoctors);
 router.get("/:id", doctorController.getDoctorById);
-router.put("/:id", doctorController.updateDoctor);
+
+router.put('/:id', upload.single('photo'), doctorController.updateDoctor);
 router.delete("/:id", doctorController.deleteDoctor);
 
 router.post("/", upload.single("photo"), doctorController.createDoctor);

@@ -1,3 +1,4 @@
+const doctorModel = require("../models/doctorModel");
 const db = require("../config/db");
 
 const asyncHandler = require("../utils/asyncHandler");
@@ -22,15 +23,27 @@ exports.createDoctor = asyncHandler(async (req, res, next) => {
 
   const photoPath = req.file ? req.file.path : null;
 
-  const [result] = await db.query(
-    "INSERT INTO doctors (name, specialization, experience, photo) VALUES (?, ?, ?, ?)",
-    [name, specialization, experience, photoPath],
+  // const [result] = await db.query(
+  //   "INSERT INTO doctors (name, specialization, experience, photo) VALUES (?, ?, ?, ?)",
+  //   [name, specialization, experience, photoPath],
+  // );
+
+  // res.status(201).json({
+  //   success: true,
+  //   message: "Doctor created",
+  //   doctorId: result.insertId,
+  // });
+  const insertId = await doctorModel.create(
+    name,
+    specialization,
+    experienceNumber,
+    photoPath,
   );
 
   res.status(201).json({
     success: true,
     message: "Doctor created",
-    doctorId: result.insertId,
+    doctorId: insertId,
   });
   // } catch (error) {
   //   // res.status(500).json({ error: error.message });
@@ -69,16 +82,19 @@ exports.getDoctors = asyncHandler(async (req, res) => {
     values.push(`%${search}%`);
   }
 
-  const [rows] = await db.query(`SELECT * ${baseQuery} LIMIT ? OFFSET ?`, [
-    ...values,
-    limit,
-    offset,
-  ]);
+  // const [rows] = await db.query(`SELECT * ${baseQuery} LIMIT ? OFFSET ?`, [
+  //   ...values,
+  //   limit,
+  //   offset,
+  // ]);
 
-  const [[{ count }]] = await db.query(
-    `SELECT COUNT(*) as count ${baseQuery}`,
-    values,
-  );
+  // const [[{ count }]] = await db.query(
+  //   `SELECT COUNT(*) as count ${baseQuery}`,
+  //   values,
+  // );
+
+  const rows = await doctorModel.findAll(baseQuery, values, limit, offset);
+  const count = await doctorModel.countAll(baseQuery, values);
 
   const updatedRows = rows.map((doctor) => {
     let photoUrl = null;
@@ -105,20 +121,14 @@ exports.getDoctors = asyncHandler(async (req, res) => {
   });
 });
 
-exports.getDoctorById = asyncHandler(async (req, res, next) => {
-  // try {
-  const { id } = req.params;
+exports.getDoctorById = asyncHandler(async (req, res) => {
+  const doctor = await doctorModel.findById(req.params.id);
 
-  const [rows] = await db.query("SELECT * FROM doctors WHERE id = ?", [id]);
-
-  if (rows.length === 0) {
-    // return res.status(404).json({ message: "Doctor not found" });
+  if (!doctor) {
     const error = new Error("Doctor not found");
     error.statusCode = 404;
     throw error;
   }
-
-  const doctor = rows[0];
 
   if (doctor.photo) {
     const normalizedPath = doctor.photo.replace(/\\/g, "/");
@@ -131,28 +141,24 @@ exports.getDoctorById = asyncHandler(async (req, res, next) => {
     success: true,
     data: doctor,
   });
-  // } catch (error) {
-  //   // res.status(500).json({ error: error.message });
-  //   next(error);
-  // }
 });
+
+// } catch (error) {
+//   // res.status(500).json({ error: error.message });
+//   next(error);
+// }
 
 exports.updateDoctor = asyncHandler(async (req, res, next) => {
   // try {
   const { id } = req.params;
   const { name, specialization, experience } = req.body;
 
-  const [result] = await db.query(
-    "UPDATE doctors SET name = ?, specialization = ?, experience = ? WHERE id = ?",
-    [name, specialization, experience, id],
-  );
-
-  if (result.affectedRows === 0) {
-    // return res.status(404).json({ message: "Doctor not found" });
-    const error = new Error("Doctor not found");
-    error.statusCode = 404;
-    throw error;
-  }
+  // const [result] = await db.query(
+  //   "UPDATE doctors SET name = ?, specialization = ?, experience = ? WHERE id = ?",
+  //   [name, specialization, experience, id],
+  // );
+  
+  
 
   if (!name || !specialization || !experience) {
     // return res.status(400).json({ message: "All fields required" });
@@ -160,6 +166,27 @@ exports.updateDoctor = asyncHandler(async (req, res, next) => {
     error.statusCode = 400;
     throw error;
   }
+
+  const photoPath = req.file
+    ? `uploads/doctors/${req.file.filename}`
+    : null;
+
+  const affectedRows = await doctorModel.update(
+    id,
+    name,
+    specialization,
+    experience,
+    photoPath,
+  );
+
+  if (affectedRows === 0) {
+    // return res.status(404).json({ message: "Doctor not found" });
+    const error = new Error("Doctor not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+
 
   res.json({ success: true, message: "Doctor updated" });
   // } catch (error) {
@@ -172,9 +199,9 @@ exports.deleteDoctor = asyncHandler(async (req, res, next) => {
   // try {
   const { id } = req.params;
 
-  const [result] = await db.query("DELETE FROM doctors WHERE id = ?", [id]);
+  const affectedRows = await doctorModel.remove(id);
 
-  if (result.affectedRows === 0) {
+  if (affectedRows === 0) {
     // return res.status(404).json({ message: "Doctor not found" });
     const error = new Error("Doctor not found");
     error.statusCode = 404;
