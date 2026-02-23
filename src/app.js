@@ -8,6 +8,10 @@ const doctorRoutes = require("./routes/doctorRoutes");
 
 const path = require("path");
 
+const authRoutes = require("./routes/authRoutes");
+
+app.use("/api/auth", authRoutes);
+
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/", (req, res) => {
