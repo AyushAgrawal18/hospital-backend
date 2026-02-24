@@ -10,6 +10,10 @@ const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 
+const appointmentRoutes = require("./routes/appointmentRoutes");
+
+app.use("/api/appointments", appointmentRoutes);
+
 app.use("/api/auth", authRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
