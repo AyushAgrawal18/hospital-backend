@@ -6,12 +6,15 @@ const {
 } = require("../controllers/appointmentController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
-router.post("/", protect, bookAppointment);
+// router.post("/", protect, bookAppointment);
+
 router.patch(
   "/:id/status",
   protect,
-  authorize("admin"),
+  authorize("admin", "doctor"),
   updateAppointmentStatus,
 );
+
+router.post("/", protect, authorize("admin", "staff"), bookAppointment);
 
 module.exports = router;
