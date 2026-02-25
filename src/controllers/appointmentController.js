@@ -46,3 +46,46 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
     connection.release();
   }
 });
+
+exports.updateAppointmentStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!["booked", "completed", "cancelled"].includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid status value",
+    });
+  }
+
+  const [rows] = await db.query(
+    "SELECT status FROM appointments WHERE id = ?",
+    [id],
+  );
+
+  if (rows.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "Appointment not found",
+    });
+  }
+
+  const currentStatus = rows[0].status;
+
+  if (currentStatus !== "booked") {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot modify completed or cancelled appointment",
+    });
+  }
+
+  await db.query("UPDATE appointments SET status = ? WHERE id = ?", [
+    status,
+    id,
+  ]);
+
+  res.json({
+    success: true,
+    message: "Appointment status updated",
+  });
+});
