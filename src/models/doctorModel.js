@@ -48,3 +48,12 @@ exports.remove = async (id) => {
 
   return result.affectedRows;
 };
+
+exports.findByUserId = async (userId) => {
+const [rows] = await db.query(
+"SELECT * FROM doctors WHERE user_id = ?",
+[userId]
+);
+
+return rows[0];
+};

@@ -2,6 +2,8 @@ const db = require("../config/db");
 const asyncHandler = require("../utils/asyncHandler");
 const patientModel = require("../models/patientModel");
 const appointmentModel = require("../models/appointmentModel");
+const doctorModel = require("../models/doctorModel");
+
 
 exports.bookAppointment = asyncHandler(async (req, res) => {
   const { doctorId, name, email, phone, appointmentTime } = req.body;
@@ -89,3 +91,59 @@ exports.updateAppointmentStatus = asyncHandler(async (req, res) => {
     message: "Appointment status updated",
   });
 });
+
+exports.getMyAppointments = asyncHandler(async (req, res) => {
+
+// Admin & staff see all appointments
+if (req.user.role === "admin" || req.user.role === "staff") {
+
+const [rows] = await db.query(
+  `SELECT 
+      appointments.id,
+      appointments.appointment_time,
+      appointments.status,
+      patients.name AS patient_name,
+      doctors.name AS doctor_name
+   FROM appointments
+   JOIN patients ON appointments.patient_id = patients.id
+   JOIN doctors ON appointments.doctor_id = doctors.id
+   ORDER BY appointment_time ASC`
+);
+
+return res.json({
+  success: true,
+  count: rows.length,
+  data: rows,
+});
+
+}
+
+// Doctor sees only own appointments
+if (req.user.role === "doctor") {
+
+const doctor = await doctorModel.findByUserId(req.user.id);
+
+if (!doctor) {
+  return res.status(404).json({
+    success: false,
+    message: "Doctor profile not found",
+  });
+}
+
+const appointments =
+  await appointmentModel.findAppointmentsByDoctorId(doctor.id);
+
+return res.json({
+  success: true,
+  count: appointments.length,
+  data: appointments,
+});
+
+}
+
+res.status(403).json({
+success: false,
+message: "Access denied",
+});
+});
+

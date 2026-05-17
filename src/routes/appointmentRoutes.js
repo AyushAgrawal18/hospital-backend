@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   bookAppointment,
   updateAppointmentStatus,
+  getMyAppointments,
 } = require("../controllers/appointmentController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -11,10 +12,12 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 router.patch(
   "/:id/status",
   protect,
-  authorize("admin", "doctor"),
+  authorize("admin"),
   updateAppointmentStatus,
 );
 
 router.post("/", protect, authorize("admin", "staff"), bookAppointment);
+
+router.get("/my", protect, getMyAppointments);
 
 module.exports = router;
