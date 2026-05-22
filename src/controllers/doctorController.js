@@ -5,9 +5,9 @@ const asyncHandler = require("../utils/asyncHandler");
 
 exports.createDoctor = asyncHandler(async (req, res, next) => {
   // try {
-  const { name, specialization, experience } = req.body;
+  const { name, specialization, experience, consultation_fee } = req.body;
 
-  if (!name || !specialization || experience === null) {
+  if (!name || !specialization || experience === null || consultation_fee === undefined) {
     const error = new Error("All fields are required");
     error.statusCode = 400;
     throw error;
@@ -38,6 +38,7 @@ exports.createDoctor = asyncHandler(async (req, res, next) => {
     specialization,
     experienceNumber,
     photoPath,
+    consultation_fee
   );
 
   res.status(201).json({
@@ -151,17 +152,9 @@ exports.getDoctorById = asyncHandler(async (req, res) => {
 exports.updateDoctor = asyncHandler(async (req, res, next) => {
   // try {
   const { id } = req.params;
-  const { name, specialization, experience } = req.body;
+  const { name, specialization, experience, consultation_fee } = req.body;
 
-  // const [result] = await db.query(
-  //   "UPDATE doctors SET name = ?, specialization = ?, experience = ? WHERE id = ?",
-  //   [name, specialization, experience, id],
-  // );
-  
-  
-
-  if (!name || !specialization || !experience) {
-    // return res.status(400).json({ message: "All fields required" });
+  if (!name || !specialization || experience === undefined || consultation_fee === undefined) {
     const error = new Error("All fields are required");
     error.statusCode = 400;
     throw error;
@@ -177,6 +170,7 @@ exports.updateDoctor = asyncHandler(async (req, res, next) => {
     specialization,
     experience,
     photoPath,
+    consultation_fee
   );
 
   if (affectedRows === 0) {

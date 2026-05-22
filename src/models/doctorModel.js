@@ -25,19 +25,19 @@ exports.findById = async (id) => {
   return rows[0];
 };
 
-exports.create = async (name, specialization, experience, photoPath) => {
+exports.create = async (name, specialization, experience, photoPath, consultationFee) => {
   const [result] = await db.query(
-    "INSERT INTO doctors (name, specialization, experience, photo) VALUES (?, ?, ?, ?)",
-    [name, specialization, experience, photoPath],
+    "INSERT INTO doctors (name, specialization, experience, photo, consultation_fee) VALUES (?, ?, ?, ?, ?)",
+    [name, specialization, experience, photoPath, consultationFee || 0],
   );
 
   return result.insertId;
 };
 
-exports.update = async (id, name, specialization, experience, photoPath) => {
+exports.update = async (id, name, specialization, experience, photoPath, consultationFee) => {
   const [result] = await db.query(
-    "UPDATE doctors SET name = ?, specialization = ?, experience = ?, photo = COALESCE(?, photo) WHERE id = ?",
-    [name, specialization, experience, photoPath, id],
+    "UPDATE doctors SET name = ?, specialization = ?, experience = ?, photo = COALESCE(?, photo), consultation_fee = ? WHERE id = ?",
+    [name, specialization, experience, photoPath, consultationFee || 0, id],
   );
 
   return result.affectedRows;

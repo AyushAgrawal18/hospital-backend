@@ -11,8 +11,10 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 
 const appointmentRoutes = require("./routes/appointmentRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 app.use("/api/appointments", appointmentRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.use("/api/auth", authRoutes);
 
