@@ -165,3 +165,50 @@ exports.verifyPayment = asyncHandler(async (req, res, next) => {
   error.statusCode = 400;
   throw error;
 });
+
+exports.stripeWebhook = asyncHandler(async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    // session.id is our payment_id
+    await db.query("UPDATE appointments SET payment_status = 'completed' WHERE payment_id = ?", [session.id]);
+  }
+
+  res.json({ received: true });
+});
+
+exports.razorpayWebhook = asyncHandler(async (req, res) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const signature = req.headers["x-razorpay-signature"];
+
+  if (!signature) {
+    return res.status(400).send("No signature found");
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(JSON.stringify(req.body))
+    .digest("hex");
+
+  if (expectedSignature !== signature) {
+    return res.status(400).send("Invalid signature");
+  }
+
+  const event = req.body;
+
+  if (event.event === "order.paid") {
+    const order = event.payload.order.entity;
+    // order.id is our payment_id
+    await db.query("UPDATE appointments SET payment_status = 'completed' WHERE payment_id = ?", [order.id]);
+  }
+
+  res.json({ status: "ok" });
+});

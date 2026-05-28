@@ -13,6 +13,9 @@ jest.mock("stripe", () => {
         retrieve: jest.fn(),
       },
     },
+    webhooks: {
+      constructEvent: jest.fn(),
+    },
   };
   const fn = jest.fn().mockReturnValue(stripeObj);
   fn.stripeObj = stripeObj;
@@ -48,11 +51,13 @@ describe("paymentController", () => {
   beforeEach(() => {
     req = {
       body: {},
+      headers: {},
       protocol: "http",
       get: jest.fn().mockReturnValue("localhost:3000"),
     };
     res = {
       json: jest.fn(),
+      send: jest.fn(),
       status: jest.fn().mockReturnThis(),
     };
     next = jest.fn();
@@ -150,6 +155,69 @@ describe("paymentController", () => {
 
       expect(db.query).toHaveBeenCalledWith("UPDATE appointments SET payment_status = 'completed' WHERE id = ?", [1]);
       expect(res.json).toHaveBeenCalledWith({ success: true, message: "Payment verified successfully" });
+    });
+  });
+
+  describe("stripeWebhook", () => {
+    it("should return 400 on signature failure", async () => {
+      req.headers["stripe-signature"] = "invalid";
+      req.body = {};
+      stripeInstance.webhooks.constructEvent = jest.fn().mockImplementation(() => {
+        throw new Error("Invalid signature");
+      });
+
+      await paymentController.stripeWebhook(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it("should update appointment status on checkout.session.completed", async () => {
+      req.headers["stripe-signature"] = "valid";
+      req.body = {};
+      stripeInstance.webhooks.constructEvent = jest.fn().mockReturnValue({
+        type: "checkout.session.completed",
+        data: { object: { id: "sess_1" } },
+      });
+
+      await paymentController.stripeWebhook(req, res, next);
+
+      expect(db.query).toHaveBeenCalledWith("UPDATE appointments SET payment_status = 'completed' WHERE payment_id = ?", ["sess_1"]);
+      expect(res.json).toHaveBeenCalledWith({ received: true });
+    });
+  });
+
+  describe("razorpayWebhook", () => {
+    it("should return 400 on missing signature", async () => {
+      req.headers["x-razorpay-signature"] = null;
+
+      await paymentController.razorpayWebhook(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status().send).toHaveBeenCalledWith("No signature found");
+    });
+
+    it("should return 400 on invalid signature", async () => {
+      req.headers["x-razorpay-signature"] = "invalid";
+      req.body = {};
+      const mockUpdate = jest.fn().mockReturnValue({ digest: jest.fn().mockReturnValue("different") });
+      crypto.createHmac.mockReturnValue({ update: mockUpdate });
+
+      await paymentController.razorpayWebhook(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status().send).toHaveBeenCalledWith("Invalid signature");
+    });
+
+    it("should update appointment status on order.paid", async () => {
+      req.headers["x-razorpay-signature"] = "valid";
+      req.body = { event: "order.paid", payload: { order: { entity: { id: "order_1" } } } };
+      const mockUpdate = jest.fn().mockReturnValue({ digest: jest.fn().mockReturnValue("valid") });
+      crypto.createHmac.mockReturnValue({ update: mockUpdate });
+
+      await paymentController.razorpayWebhook(req, res, next);
+
+      expect(db.query).toHaveBeenCalledWith("UPDATE appointments SET payment_status = 'completed' WHERE payment_id = ?", ["order_1"]);
+      expect(res.json).toHaveBeenCalledWith({ status: "ok" });
     });
   });
 });

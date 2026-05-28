@@ -49,6 +49,24 @@ const migrate = async () => {
     }
   }
 
+  try {
+    console.log("Adding user_id to patients table...");
+    await db.query(`
+      ALTER TABLE patients 
+      ADD COLUMN user_id INT DEFAULT NULL,
+      ADD CONSTRAINT fk_patient_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    `);
+    console.log("Added user_id column successfully.");
+  } catch (err) {
+    // ER_DUP_FIELDNAME or other duplicate checks might happen, but MySQL might throw ER_CANT_DROP_FIELD_OR_KEY or something else if we just run it. 
+    // To be safe against ER_DUP_FIELDNAME, we can catch it.
+    if (err.code === "ER_DUP_FIELDNAME") {
+      console.log("Column user_id already exists. Skipping.");
+    } else {
+      console.error("Error adding user_id:", err.message);
+    }
+  }
+
   console.log("Migration complete!");
   process.exit(0);
 };

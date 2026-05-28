@@ -155,7 +155,7 @@ describe("appointmentController", () => {
     });
 
     it("should return 403 for unauthorized roles", async () => {
-      req.user = { role: "patient" };
+      req.user = { role: "unknown" };
 
       await appointmentController.getMyAppointments(req, res, next);
 

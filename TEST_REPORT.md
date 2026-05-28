@@ -2,11 +2,11 @@
 
 ## Test Execution Summary
 
-**Date:** May 22, 2026  
+**Date:** May 29, 2026  
 **Status:** ✅ **ALL TESTS PASSING**  
 **Total Test Suites:** 13 passed out of 13  
 **Total Tests:** 86 passed out of 86  
-**Test Duration:** ~2.4 seconds
+**Test Duration:** ~4.6 seconds
 
 ---
 
@@ -14,10 +14,10 @@
 
 ### Overall Code Coverage
 
-- **Statements:** 92.94%
-- **Branches:** 85.36%
+- **Statements:** 92.28%
+- **Branches:** 82.99%
 - **Functions:** 100%
-- **Lines:** 92.94%
+- **Lines:** 92.28%
 
 ### Coverage by Component
 
@@ -28,11 +28,12 @@
 
 #### Controllers
 
-- ✅ **90.08% Coverage**
+- ✅ **~89.65% Coverage**
   - `authController.js`: ✅ 100%
-  - `appointmentController.js`: ✅ 97.87%
+  - `appointmentController.js`: ✅ 88.67%
   - `doctorController.js`: ✅ 98.61%
-  - `paymentController.js`: 🟡 73.75%
+  - `paymentController.js`: 🟡 79.41%
+  - `patientController.js`: ✅ 93.33%
 
 #### Middleware
 
@@ -45,9 +46,9 @@
 
 - ✅ **100% Coverage**
   - `userModel.js`: ✅ 100%
-  - `patientModel.js`: ✅ 100%
   - `appointmentModel.js`: ✅ 100%
   - `doctorModel.js`: ✅ 100%
+  - `patientModel.js`: ✅ 100%
 
 ---
 
@@ -86,8 +87,8 @@
 
 ### 🟡 Areas for Enhancement
 
-1. **Test Database** - A dedicated Dockerized MySQL database specifically for Integration testing would provide true end-to-end validation.
-2. **Setup CI/CD Pipeline** - Run `npm run test:coverage` automatically on GitHub Commits using GitHub Actions.
+1. **Test Database** - A dedicated Dockerized MySQL database specifically for Integration testing would provide true end-to-end validation locally.
+2. **✅ CI/CD Pipeline** - We have successfully set up GitHub Actions (`.github/workflows/test.yml`) to automatically run `npm run test:coverage` on GitHub Commits and PRs.
 
 ---
 

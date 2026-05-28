@@ -5,7 +5,9 @@ A Node.js/Express backend API for a hospital management system. This API handles
 ## Features
 - **User Authentication**: Secure JWT-based authentication.
 - **Doctors Management**: Endpoints to manage doctor profiles.
-- **Appointments**: Schedule and manage patient appointments.
+- **Patient Management**: Endpoints for patients to register, login, and manage profiles.
+- **Appointments**: Schedule and manage patient appointments with role-based access.
+- **Payments**: Integrated Stripe and Razorpay checkout sessions with automated webhook verification.
 - **File Uploads**: Supports uploading files (e.g., doctor images).
 - **Error Handling**: Centralized error handling middleware.
 
@@ -57,6 +59,8 @@ npm test
 ## API Endpoints (Overview)
 - **Auth**: `/api/auth` - Register and authenticate users.
 - **Doctors**: `/api/doctors` - Manage doctor records.
+- **Patients**: `/api/patients` - Manage patient records.
 - **Appointments**: `/api/appointments` - Book and manage appointments.
+- **Payments**: `/api/payments` - Stripe and Razorpay integrations and webhooks.
 - **Health Check**: `/` and `/test-db` - Verify server and database connectivity.
 - **Static Uploads**: `/uploads` - Access uploaded files.

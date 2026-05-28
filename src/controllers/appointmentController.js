@@ -141,6 +141,39 @@ return res.json({
 
 }
 
+// Patient sees only own appointments
+if (req.user.role === "patient") {
+  const patient = await patientModel.findByUserId(req.user.id);
+
+  if (!patient) {
+    return res.status(404).json({
+      success: false,
+      message: "Patient profile not found",
+    });
+  }
+
+  const [rows] = await db.query(
+    `SELECT 
+        appointments.id,
+        appointments.appointment_time,
+        appointments.status,
+        appointments.payment_status,
+        doctors.name AS doctor_name,
+        doctors.consultation_fee
+     FROM appointments
+     JOIN doctors ON appointments.doctor_id = doctors.id
+     WHERE appointments.patient_id = ?
+     ORDER BY appointment_time ASC`,
+     [patient.id]
+  );
+
+  return res.json({
+    success: true,
+    count: rows.length,
+    data: rows,
+  });
+}
+
 res.status(403).json({
 success: false,
 message: "Access denied",
