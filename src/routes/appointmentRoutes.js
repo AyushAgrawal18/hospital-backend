@@ -12,11 +12,11 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 router.patch(
   "/:id/status",
   protect,
-  authorize("admin"),
+  authorize("admin", "doctor"),
   updateAppointmentStatus,
 );
 
-router.post("/", protect, authorize("admin", "staff"), bookAppointment);
+router.post("/", protect, authorize("admin", "staff", "patient"), bookAppointment);
 
 router.get("/my", protect, getMyAppointments);
 

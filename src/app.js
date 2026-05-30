@@ -1,6 +1,8 @@
 const express = require("express");
+const cors = require("cors");
 
 const app = express();
+app.use(cors());
 // Use express.json for all routes EXCEPT the Stripe webhook, which requires the raw body
 app.use((req, res, next) => {
   if (req.originalUrl === '/api/payments/webhook/stripe') {

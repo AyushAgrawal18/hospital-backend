@@ -6,10 +6,15 @@ const doctorModel = require("../models/doctorModel");
 
 
 exports.bookAppointment = asyncHandler(async (req, res) => {
-  const { doctorId, name, email, phone, appointmentTime } = req.body;
+  const { doctor_id, doctorId, appointment_date, appointment_time, appointmentTime, name, email, phone } = req.body;
 
-  if (!doctorId || !name || !appointmentTime) {
-    const error = new Error("Required fields missing");
+  const finalDoctorId = doctor_id || doctorId;
+  const finalAppointmentTime = (appointment_date && appointment_time) 
+    ? `${appointment_date} ${appointment_time}:00` 
+    : appointmentTime;
+
+  if (!finalDoctorId || !finalAppointmentTime) {
+    const error = new Error("Doctor ID and Appointment Time are required");
     error.statusCode = 400;
     throw error;
   }
@@ -19,13 +24,25 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const patientId = await patientModel.create(connection, name, email, phone);
+    let patientId;
+    if (req.user && req.user.role === "patient") {
+      const patient = await patientModel.findByUserId(req.user.id);
+      if (!patient) {
+        throw new Error("Patient profile not found");
+      }
+      patientId = patient.id;
+    } else {
+      if (!name || !email) {
+        throw new Error("Patient name and email are required for manual booking");
+      }
+      patientId = await patientModel.create(connection, name, email, phone);
+    }
 
     const appointmentId = await appointmentModel.create(
       connection,
-      doctorId,
+      finalDoctorId,
       patientId,
-      appointmentTime,
+      finalAppointmentTime,
     );
 
     await connection.commit();
@@ -33,7 +50,8 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Appointment booked",
-      appointmentId,
+      id: appointmentId,
+      appointmentId: appointmentId
     });
   } catch (error) {
     await connection.rollback();
@@ -41,6 +59,12 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "This time slot is already booked",
+      });
+    }
+    if (error.message === "Patient profile not found") {
+      return res.status(404).json({
+        success: false,
+        message: "Patient profile not found. Please complete your profile first."
       });
     }
     throw error;
@@ -146,9 +170,11 @@ if (req.user.role === "patient") {
   const patient = await patientModel.findByUserId(req.user.id);
 
   if (!patient) {
-    return res.status(404).json({
-      success: false,
-      message: "Patient profile not found",
+    return res.json({
+      success: true,
+      count: 0,
+      data: [],
+      message: "Patient profile not completed yet.",
     });
   }
 

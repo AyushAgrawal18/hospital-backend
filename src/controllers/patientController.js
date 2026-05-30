@@ -17,8 +17,9 @@ exports.getPatientProfile = asyncHandler(async (req, res) => {
   const patient = await patientModel.findByUserId(req.user.id);
 
   if (!patient) {
-    return res.status(404).json({
-      success: false,
+    return res.json({
+      success: true,
+      data: null,
       message: "Patient profile not found",
     });
   }
