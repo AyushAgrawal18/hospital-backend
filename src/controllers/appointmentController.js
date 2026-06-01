@@ -14,7 +14,7 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
     : appointmentTime;
 
   if (!finalDoctorId || !finalAppointmentTime) {
-    const error = new Error("Doctor ID and Appointment Time are required");
+    const error = new Error("Required fields missing");
     error.statusCode = 400;
     throw error;
   }
@@ -50,7 +50,6 @@ exports.bookAppointment = asyncHandler(async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Appointment booked",
-      id: appointmentId,
       appointmentId: appointmentId
     });
   } catch (error) {
