@@ -13,15 +13,15 @@ app.use((req, res, next) => {
 });
 
 const db = require("./config/db");
-const doctorRoutes = require("./routes/doctorRoutes");
+const doctorRoutes = require("./modules/doctor/doctor.routes");
 
 const path = require("path");
 
-const authRoutes = require("./routes/authRoutes");
-const patientRoutes = require("./routes/patientRoutes");
+const authRoutes = require("./modules/auth/auth.routes");
+const patientRoutes = require("./modules/patient/patient.routes");
 
-const appointmentRoutes = require("./routes/appointmentRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
+const appointmentRoutes = require("./modules/appointment/appointment.routes");
+const paymentRoutes = require("./modules/payment/payment.routes");
 
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/payments", paymentRoutes);

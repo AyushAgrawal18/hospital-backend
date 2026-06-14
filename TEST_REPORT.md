@@ -29,11 +29,11 @@
 #### Controllers
 
 - ✅ **~89.65% Coverage**
-  - `authController.js`: ✅ 100%
-  - `appointmentController.js`: ✅ 88.67%
-  - `doctorController.js`: ✅ 98.61%
-  - `paymentController.js`: 🟡 79.41%
-  - `patientController.js`: ✅ 93.33%
+  - `auth.controller.js`: ✅ 100%
+  - `appointment.controller.js`: ✅ 88.67%
+  - `doctor.controller.js`: ✅ 98.61%
+  - `payment.controller.js`: 🟡 79.41%
+  - `patient.controller.js`: ✅ 93.33%
 
 #### Middleware
 
@@ -45,35 +45,35 @@
 #### Models
 
 - ✅ **100% Coverage**
-  - `userModel.js`: ✅ 100%
-  - `appointmentModel.js`: ✅ 100%
-  - `doctorModel.js`: ✅ 100%
-  - `patientModel.js`: ✅ 100%
+  - `user.model.js`: ✅ 100%
+  - `appointment.model.js`: ✅ 100%
+  - `doctor.model.js`: ✅ 100%
+  - `patient.model.js`: ✅ 100%
 
 ---
 
 ## Test Suites Overview
 
 ### 1. Integration Tests (24 tests)
-- **`auth.test.js` (6 tests)**: End-to-end routing for registration, login, db connection, and health checks.
-- **`doctor.test.js` (9 tests)**: End-to-end routing for fetching, creating, updating, and deleting doctors.
-- **`appointment.test.js` (9 tests)**: End-to-end routing for booking appointments, updates, and fetch logic.
+- **`auth.routes.test.js` (6 tests)**: End-to-end routing for registration, login, db connection, and health checks.
+- **`doctor.routes.test.js` (9 tests)**: End-to-end routing for fetching, creating, updating, and deleting doctors.
+- **`appointment.routes.test.js` (9 tests)**: End-to-end routing for booking appointments, updates, and fetch logic.
 
 ### 2. Controller Unit Tests (28 tests)
-- **`authController.test.js` (6 tests)**: Mocked DB handling for registration and login validation logic.
-- **`appointmentController.test.js` (8 tests)**: Mocked DB handling for bookings, duplicate checks, transaction rollbacks, and role verification.
-- **`doctorController.test.js` (5 tests)**: Mocked DB handling for creation validation, updates, pagination filtering, and 404 responses.
-- **`paymentController.test.js` (9 tests)**: Mocked Stripe/Razorpay SDKs for checkout generation and webhook verification.
+- **`auth.controller.test.js` (6 tests)**: Mocked DB handling for registration and login validation logic.
+- **`appointment.controller.test.js` (8 tests)**: Mocked DB handling for bookings, duplicate checks, transaction rollbacks, and role verification.
+- **`doctor.controller.test.js` (5 tests)**: Mocked DB handling for creation validation, updates, pagination filtering, and 404 responses.
+- **`payment.controller.test.js` (9 tests)**: Mocked Stripe/Razorpay SDKs for checkout generation and webhook verification.
 
 ### 3. Middleware Unit Tests (9 tests)
 - **`authMiddleware.test.js` (6 tests)**: Authorization header, JWT validation, and RBAC implementation.
 - **`uploadMiddleware.test.js` (3 tests)**: Mocking of Multer configuration for testing file extensions, disk storage naming, and 2MB file limits.
 
 ### 4. Model Unit Tests (15 tests)
-- **`userModel.test.js` (7 tests)**: SQL Query Validation.
-- **`doctorModel.test.js` (4 tests)**: SQL Query Validation.
-- **`appointmentModel.test.js` (2 tests)**: SQL Query Validation including database transactions.
-- **`patientModel.test.js` (2 tests)**: SQL Query Validation.
+- **`user.model.test.js` (7 tests)**: SQL Query Validation.
+- **`doctor.model.test.js` (4 tests)**: SQL Query Validation.
+- **`appointment.model.test.js` (2 tests)**: SQL Query Validation including database transactions.
+- **`patient.model.test.js` (2 tests)**: SQL Query Validation.
 
 ---
 
@@ -108,4 +108,4 @@ npm run test:coverage
 
 ---
 
-_Test Report Generated: 2026-05-22_
+_Test Report Generated: 2026-06-14_

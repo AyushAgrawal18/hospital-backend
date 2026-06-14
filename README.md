@@ -19,6 +19,43 @@ A Node.js/Express backend API for a hospital management system. This API handles
 - **Multer** for handling file uploads.
 - **Jest & Supertest** for unit and integration testing.
 
+
+## Folder Structure
+```text
+src/
+├── modules/
+│   ├── appointment/          # Appointment logic
+│   │   ├── appointment.controller.js
+│   │   ├── appointment.model.js
+│   │   ├── appointment.routes.js
+│   │   └── __tests__/
+│   ├── auth/                 # Authentication logic
+│   │   ├── auth.controller.js
+│   │   ├── auth.routes.js
+│   │   └── __tests__/
+│   ├── doctor/               # Doctor logic
+│   │   ├── doctor.controller.js
+│   │   ├── doctor.model.js
+│   │   ├── doctor.routes.js
+│   │   └── __tests__/
+│   ├── patient/              # Patient logic
+│   │   ├── patient.controller.js
+│   │   ├── patient.model.js
+│   │   ├── patient.routes.js
+│   │   └── __tests__/
+│   ├── payment/              # Payment logic
+│   │   ├── payment.controller.js
+│   │   ├── payment.routes.js
+│   │   └── __tests__/
+│   └── user/                 # Core User data
+│       ├── user.model.js
+│       └── __tests__/
+├── config/
+├── middleware/
+├── utils/
+└── app.js
+```
+
 ## Prerequisites
 - Node.js
 - MySQL Server

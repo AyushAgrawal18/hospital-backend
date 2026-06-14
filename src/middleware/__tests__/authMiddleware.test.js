@@ -1,9 +1,9 @@
 const { protect, authorize } = require("../authMiddleware");
 const jwt = require("jsonwebtoken");
-const userModel = require("../../models/userModel");
+const userModel = require("../../modules/user/user.model");
 
 jest.mock("jsonwebtoken");
-jest.mock("../../models/userModel");
+jest.mock("../../modules/user/user.model");
 jest.mock("../../utils/asyncHandler", () => (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next));
 
 describe("authMiddleware", () => {
